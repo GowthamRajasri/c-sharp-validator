@@ -16,7 +16,7 @@ namespace Validations
 
     public class BaseIValidator
     {
-        public void Validate(IValidator validator)
+        public void Validate(IValidator validators)
         {
             IDictionary<string, List<string>> outputerrors = new Dictionary<string, List<string>> { };
 
@@ -50,46 +50,46 @@ namespace Validations
             inputrule["digits"] = "required|digits|digitbetween:0-1|lessthan:100|greaterthan:150|greaterthanorequal:190";
             inputrule["number"] = "numeric|greaterthan:10|lessthanorequal:0|min:10";
             inputrule["string"] = "boolean|stringcheck|size:65";
-            inputrule["schedulearray"] = "array|arraylength:5|arraytype:string";
+            inputrule["schedulearray"] = "array|arraylength:5";
 
 
             IDictionary<string, string> customizedmessages = new Dictionary<string, string>{
            { "firstname.required" , "Please Enter name."},
            {"firstname.max", "Name should not exist 10 character."},
            {"Lastname.max", "Name should not exist 10 character."},
-           {"Lastname.required","Please Enter name."},
-           //{"email.required","Plese Enter Name"},
-           //{"DOB.date","Incorrect"}
-           //{"digits.required","please Enter digit."}
+           {"Lastname.required","Please Enter name."}
             };
 
 
-            outputerrors = validator.Validate(inputmsg,inputrule,customizedmessages);
-            Console.WriteLine("Validation");
+            
+           var resobj = Validator.Validate(inputmsg,inputrule,customizedmessages);
 
-            foreach (KeyValuePair<string, List<string>> item in outputerrors)
+           Console.WriteLine(resobj);
+
+            /*foreach (KeyValuePair<string, List<string>> item in outputerrors)
             {
                 Console.WriteLine(" {0}=>:{1}", item.Key, string.Join(",", item.Value));
-            }
+            }*/
+
              Console.ReadLine();
 
 
         }
     }
-    public class Validator : IValidator
+    public class Validator 
     {
-
-
+        Dictionary<string, List<string>> outputerrors = new Dictionary<string, List<string>> { };
+        private List<string> oldValue = new List<string>();
+        private string msgRule;
+        private string msgvalue;
+        private string dot = ".";
+         
         public enum commonerrormesgs
         {
             required, max, email, mobilenumber, date, url, ip, digits, dateformat, after,
             afterorequal, before, beforeorequal, between, numeric, digitbetween, dateequals, greaterthan, lessthan,
-            lessthanorequal, greaterthanorequal, min, boolean, stringcheck, size, regex, array, arraylength,arraytype
+            lessthanorequal, greaterthanorequal, min, boolean, stringcheck, size, regex, array, arraylength
         };
-
-
-
-
 
 
         Dictionary<commonerrormesgs, string> errormessages = new Dictionary<commonerrormesgs, string>  {
@@ -148,28 +148,24 @@ namespace Validations
 
           {commonerrormesgs.array,"The {{fieldname}} is not an array"},
 
-          {commonerrormesgs.arraylength,"The {{fieldname}} is not given length"},
-          
-          {commonerrormesgs.arraytype,"The {{fieldname}} is not given type"}
-
-
-             
+          {commonerrormesgs.arraylength,"The {{fieldname}} is not given length"},           
 
         };
 
 
 
-        Dictionary<string, List<string>> outputerrors = new Dictionary<string, List<string>> { };
-        List<string> oldValue = new List<string>();
-        string msgRule;
-        string msgvalue;
-        string dot = ".";
+
+
+
 
         IDictionary<string, string> customizedmessages;
 
-        public IDictionary<string, List<string>> Validate(IDictionary<string, object> validateValue, IDictionary<string, string> validationRule, IDictionary<string, string> customizedmessages)
+        public static Validator Validate(IDictionary<string, object> validateValue, IDictionary<string, string> validationRule, IDictionary<string, string> customizedmessages)
         {
-            this.customizedmessages = customizedmessages;
+            
+            Validator obj = new Validator();
+
+            obj.customizedmessages = customizedmessages;
 
             string[] validatevalueKey = validateValue.Keys.ToArray();
             var validatevalueval = validateValue.Values.ToArray();
@@ -203,167 +199,193 @@ namespace Validations
                         {
                             case commonerrormesgs.required:
 
-                                Required(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
+                               obj.Required(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
                                 break;
 
                             case commonerrormesgs.max:
 
-                                Max(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                              obj.Max(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
                                 break;
 
                             case commonerrormesgs.email:
 
-                                Email(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
+                               obj.Email(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
                                 break;
 
                             case commonerrormesgs.mobilenumber:
 
-                                mobilenumber(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
+                                obj.mobilenumber(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
                                 break;
 
                             case commonerrormesgs.date:
 
-                                Date(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
+                                obj.Date(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
                                 break;
 
                             case commonerrormesgs.url:
 
-                                URL(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
+                                obj.URL(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
                                 break;
 
                             case commonerrormesgs.ip:
-                                IPadd(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
+                                obj.IPadd(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
                                 break;
 
                             case commonerrormesgs.digits:
 
-                                Digits(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
+                                obj.Digits(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
                                 break;
 
                             case commonerrormesgs.dateformat:
 
-                                Dateformat(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                                obj.Dateformat(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
                                 break;
 
                             case commonerrormesgs.after:
-                                After(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
+                                obj.After(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
                                 break;
                             case commonerrormesgs.afterorequal:
 
-                                Afterorequal(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
+                                obj.Afterorequal(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
                                 break;
 
                             case commonerrormesgs.before:
 
-                                Before(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
+                                obj.Before(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
                                 break;
 
                             case commonerrormesgs.beforeorequal:
 
-                                Beforeorequal(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
+                                obj.Beforeorequal(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
                                 break;
 
                             case commonerrormesgs.between:
 
-                                Between(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                                obj.Between(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
                                 break;
 
                             case commonerrormesgs.numeric:
 
-                                Numeric(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
+                                obj.Numeric(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
                                 break;
 
                             case commonerrormesgs.digitbetween:
 
-                                Digitbetween(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                                obj.Digitbetween(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
                                 break;
 
                             case commonerrormesgs.dateequals:
 
-                                Dateequals(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
+                                obj.Dateequals(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
                                 break;
 
                             case commonerrormesgs.greaterthan:
 
-                                Greaterthan(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                                obj.Greaterthan(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
                                 break;
 
                             case commonerrormesgs.lessthan:
 
-                                Lessthan(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                                obj.Lessthan(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
                                 break;
 
                             case commonerrormesgs.lessthanorequal:
 
-                                Lessthanorequal(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                                obj.Lessthanorequal(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
                                 break;
 
                             case commonerrormesgs.greaterthanorequal:
 
-                                Greaterthanorequal(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                                obj.Greaterthanorequal(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
                                 break;
 
                             case commonerrormesgs.min:
 
-                                Min(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDecimal(lettersnums[1]));
+                                obj.Min(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDecimal(lettersnums[1]));
                                 break;
 
                             case commonerrormesgs.boolean:
 
-                                Boolean(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
+                                obj.Boolean(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
                                 break;
 
                             case commonerrormesgs.stringcheck:
 
-                                String(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
+                                obj.String(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
                                 break;
 
                             case commonerrormesgs.size:
 
-                                Size(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDecimal(lettersnums[1]));
+                                obj.Size(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDecimal(lettersnums[1]));
                                 break;
 
                             case commonerrormesgs.regex:
 
 
-                                Regex(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                                obj.Regex(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
                                 break;
 
                             case commonerrormesgs.array:
 
-                                Array(validatevalueval[i], validatevalueKey[i]);
+                                obj.Array(validatevalueval[i], validatevalueKey[i]);
                                 break;
 
 
                             case commonerrormesgs.arraylength:
 
-                                Arraylength(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDecimal(lettersnums[1]));
+                                obj.Arraylength(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDecimal(lettersnums[1]));
                                 break;
-
-                            case commonerrormesgs.arraytype:
-
-                                Arraytype(validatevalueval[i], validatevalueKey[i], lettersnums[1]);
-                                break;
-
-
-
-
-
-
-
+                         
                         }
                     }
                 }
 
             }
-            return outputerrors;
+            return obj;
         }
 
 
 
 
+       public bool  Haserror
+        {
+            get
+            {
+                return outputerrors.Count > 0 ;
+            }
+        }
 
-        public void Required(string inputmsgvalue, string inputmsgkey)
+
+       public List<string> Errorkeys
+       {
+           get
+           {
+               return outputerrors.Keys.ToList();
+           }
+
+       }
+
+
+       public List<string>[] Errorvalues
+       {
+           get
+           {
+               return outputerrors.Values.ToArray();
+           }
+       }
+      public Dictionary<string ,List<string>> Errorkeyvalues
+      {
+          get
+          {
+              return outputerrors;
+          }
+    }
+
+
+
+
+
+       private void Required(string inputmsgvalue, string inputmsgkey)
         {
             string requirederrormgs;
             errormessages.TryGetValue(commonerrormesgs.required, out requirederrormgs);
@@ -379,7 +401,7 @@ namespace Validations
 
                     if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
                     {
-
+                    
 
                         oldValue.Add(msgvalue);
 
@@ -394,7 +416,7 @@ namespace Validations
                 else if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
                 {
 
-
+                    
                     oldValue.Add(requirederrormgs.Replace("{{fieldname}}", inputmsgkey));
 
                 }
@@ -408,7 +430,7 @@ namespace Validations
 
 
 
-        public void Max(string inputmsgvalue, string inputmsgkey, string inputlength)
+        private void Max(string inputmsgvalue, string inputmsgkey, string inputlength)
         {
             string maxerrormsgs;
             errormessages.TryGetValue(commonerrormesgs.max, out maxerrormsgs);
@@ -472,7 +494,7 @@ namespace Validations
 
 
 
-        public void Email(string inputmsgvalue, string inputmsgkey)
+        private void Email(string inputmsgvalue, string inputmsgkey)
         {
             string emailerrormsgs;
             errormessages.TryGetValue(commonerrormesgs.email, out emailerrormsgs);
@@ -521,7 +543,7 @@ namespace Validations
 
 
 
-        public void mobilenumber(string inputmsgvalue, string inputmsgkey)
+        private void mobilenumber(string inputmsgvalue, string inputmsgkey)
         {
             string mnerrormsgs;
             errormessages.TryGetValue(commonerrormesgs.mobilenumber, out mnerrormsgs);
@@ -570,7 +592,7 @@ namespace Validations
 
 
 
-        public void Date(string inputmsgvalue, string inputmsgkey)
+        private void Date(string inputmsgvalue, string inputmsgkey)
         {
             string dateerrormsgs;
             errormessages.TryGetValue(commonerrormesgs.date, out dateerrormsgs);
@@ -621,7 +643,7 @@ namespace Validations
 
 
 
-        public void URL(string inputmsgvalue, string inputmsgkey)
+       private void URL(string inputmsgvalue, string inputmsgkey)
         {
             string urlerrormsgs;
             errormessages.TryGetValue(commonerrormesgs.url, out urlerrormsgs);
@@ -670,7 +692,7 @@ namespace Validations
 
 
 
-        public void IPadd(string inputmsgvalue, string inputmsgkey)
+        private void IPadd(string inputmsgvalue, string inputmsgkey)
         {
             string ipaddresserrormsgs;
             errormessages.TryGetValue(commonerrormesgs.ip, out ipaddresserrormsgs);
@@ -718,7 +740,7 @@ namespace Validations
 
 
 
-        public void Digits(string inputmsgvalue, string inputmsgkey)
+        private void Digits(string inputmsgvalue, string inputmsgkey)
         {
             string digitserrormsgs;
             errormessages.TryGetValue(commonerrormesgs.digits, out digitserrormsgs);
@@ -763,7 +785,7 @@ namespace Validations
 
 
 
-        public void Dateformat(string inputmsgvalue, string inputmsgkey, string format)
+        private void Dateformat(string inputmsgvalue, string inputmsgkey, string format)
         {
             string dateformaterrormsgs;
             errormessages.TryGetValue(commonerrormesgs.dateformat, out dateformaterrormsgs);
@@ -809,7 +831,7 @@ namespace Validations
 
 
 
-        public void After(string inputmsgvalue, string inputmsgkey, DateTime date)
+        private void After(string inputmsgvalue, string inputmsgkey, DateTime date)
         {
             string afterdate;
             errormessages.TryGetValue(commonerrormesgs.after, out afterdate);
@@ -855,7 +877,7 @@ namespace Validations
 
 
 
-        public void Afterorequal(string inputmsgvalue, string inputmsgkey, DateTime date)
+        private void Afterorequal(string inputmsgvalue, string inputmsgkey, DateTime date)
         {
             string afterorequal;
             errormessages.TryGetValue(commonerrormesgs.afterorequal, out afterorequal);
@@ -900,7 +922,7 @@ namespace Validations
 
 
 
-        public void Before(string inputmsgvalue, string inputmsgkey, DateTime date)
+        private void Before(string inputmsgvalue, string inputmsgkey, DateTime date)
         {
             string before;
             errormessages.TryGetValue(commonerrormesgs.before, out before);
@@ -944,7 +966,7 @@ namespace Validations
 
 
 
-        public void Beforeorequal(string inputmsgvalue, string inputmsgkey, DateTime date)
+        private void Beforeorequal(string inputmsgvalue, string inputmsgkey, DateTime date)
         {
             string beforeorequal;
             errormessages.TryGetValue(commonerrormesgs.beforeorequal, out beforeorequal);
@@ -990,7 +1012,7 @@ namespace Validations
 
 
 
-        public void Between(string inputmsgvalue, string inputmsgkey, string date)
+        private void Between(string inputmsgvalue, string inputmsgkey, string date)
         {
             string[] dates = date.Split('-');
             DateTime startdate = Convert.ToDateTime(dates[0]);
@@ -1039,7 +1061,7 @@ namespace Validations
 
 
 
-        public void Numeric(string inputmsgvalue, string inputmsgkey)
+        private void Numeric(string inputmsgvalue, string inputmsgkey)
         {
             string numericerrormsgs;
             errormessages.TryGetValue(commonerrormesgs.numeric, out numericerrormsgs);
@@ -1087,7 +1109,7 @@ namespace Validations
 
 
 
-        public void Digitbetween(string inputmsgvalue, string inputmsgkey, string digits)
+        private void Digitbetween(string inputmsgvalue, string inputmsgkey, string digits)
         {
             string Digitbetweenerrormsgs;
             errormessages.TryGetValue(commonerrormesgs.digitbetween, out Digitbetweenerrormsgs);
@@ -1141,7 +1163,7 @@ namespace Validations
 
 
 
-        public void Dateequals(string inputmsgvalue, string inputmsgkey, DateTime date)
+        private void Dateequals(string inputmsgvalue, string inputmsgkey, DateTime date)
         {
             string Dateequals;
             errormessages.TryGetValue(commonerrormesgs.dateequals, out Dateequals);
@@ -1187,7 +1209,7 @@ namespace Validations
 
 
 
-        public void Lessthan(string inputmsgvalue, string inputmsgkey, string number)
+        private void Lessthan(string inputmsgvalue, string inputmsgkey, string number)
         {
             string Lessthan;
             errormessages.TryGetValue(commonerrormesgs.lessthan, out Lessthan);
@@ -1232,7 +1254,7 @@ namespace Validations
 
 
 
-        public void Greaterthan(string inputmsgvalue, string inputmsgkey, string number)
+        private void Greaterthan(string inputmsgvalue, string inputmsgkey, string number)
         {
             string Greaterthan;
             errormessages.TryGetValue(commonerrormesgs.greaterthan, out Greaterthan);
@@ -1277,7 +1299,7 @@ namespace Validations
 
 
 
-        public void Lessthanorequal(string inputmsgvalue, string inputmsgkey, string number)
+        private void Lessthanorequal(string inputmsgvalue, string inputmsgkey, string number)
         {
             string Lessthanorequal;
             errormessages.TryGetValue(commonerrormesgs.lessthanorequal, out Lessthanorequal);
@@ -1322,7 +1344,7 @@ namespace Validations
 
 
 
-        public void Greaterthanorequal(string inputmsgvalue, string inputmsgkey, string number)
+        private void Greaterthanorequal(string inputmsgvalue, string inputmsgkey, string number)
         {
             string Greaterthanorequal;
             errormessages.TryGetValue(commonerrormesgs.greaterthanorequal, out Greaterthanorequal);
@@ -1366,7 +1388,7 @@ namespace Validations
 
 
 
-        public void Min(string inputmsgvalue, string inputmsgkey, decimal min)
+        private void Min(string inputmsgvalue, string inputmsgkey, decimal min)
         {
 
             string Minerrormsgs;
@@ -1413,7 +1435,7 @@ namespace Validations
 
 
 
-        public void Boolean(string inputmsgvalue, string inputmsgkey)
+        private void Boolean(string inputmsgvalue, string inputmsgkey)
         {
 
             string Booleanerrormsgs;
@@ -1463,7 +1485,7 @@ namespace Validations
 
 
 
-        public void String(string inputmsgvalue, string inputmsgkey)
+        private void String(string inputmsgvalue, string inputmsgkey)
         {
             string stringerrormsgs;
             errormessages.TryGetValue(commonerrormesgs.stringcheck, out stringerrormsgs);
@@ -1510,7 +1532,7 @@ namespace Validations
 
 
 
-        public void Size(string inputmsgvalue, string inputmsgkey, decimal number)
+        private void Size(string inputmsgvalue, string inputmsgkey, decimal number)
         {
             string Sizeerrormsgs;
             errormessages.TryGetValue(commonerrormesgs.size, out Sizeerrormsgs);
@@ -1557,7 +1579,7 @@ namespace Validations
 
 
 
-        public void Regex(string inputmsgvalue, string inputmsgkey, string pattern)
+        private void Regex(string inputmsgvalue, string inputmsgkey, string pattern)
         {
             string regexerrormsgs;
             errormessages.TryGetValue(commonerrormesgs.regex, out regexerrormsgs);
@@ -1605,7 +1627,7 @@ namespace Validations
 
 
 
-        public void Array(object inputmsgvalue, string inputmsgkey)
+        private void Array(object inputmsgvalue, string inputmsgkey)
         {
             string Arrayerrormsgs;
             errormessages.TryGetValue(commonerrormesgs.array, out Arrayerrormsgs);
@@ -1653,7 +1675,7 @@ namespace Validations
 
 
 
-        public void Arraylength(string inputmsgvalue, string inputmsgkey, decimal number)
+        private void Arraylength(string inputmsgvalue, string inputmsgkey, decimal number)
         {
 
             string Arraylenghtherrormsgs;
@@ -1698,25 +1720,7 @@ namespace Validations
 
 
 
-        public void Arraytype(object inputmsgvalue, string inputmsgkey, string arraytype)
-        {
-         
-            string str = inputmsgvalue as string;
-            
-            object objstr = (object)arraytype;
-
-            Type valueType = objstr.GetType();
-            
-
-            var expectedType = typeof(valueType);
-
-            if (inputmsgvalue is expectedType)
-
-
-                if (inputmsgvalue.GetType().IsArrayOf(expectedType)) 
-            {
-            }
-        }
+       
 
 
 
@@ -1738,7 +1742,7 @@ namespace Validations
         public static void Main(string[] args)
         {
             BaseIValidator baseValidaor = new BaseIValidator();
-            baseValidaor.Validate(new Validator());
+            baseValidaor.Validate(null);
 
 
         }
