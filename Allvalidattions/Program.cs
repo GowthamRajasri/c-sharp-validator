@@ -11,13 +11,14 @@ namespace Validations
 
     public interface IValidator
     {
-        IDictionary<string, List<string>> Validate(IDictionary<string, object> validateValue, IDictionary<string, string> validationRule, IDictionary<string, string> customizedmessages);
+        IDictionary<string, List<string>> Validate(IDictionary<string, object> validateValue, IDictionary<string, string> validationRule);
     }
 
     public class BaseIValidator
     {
         public void Validate(IValidator validators)
         {
+
             IDictionary<string, List<string>> outputerrors = new Dictionary<string, List<string>> { };
 
             IDictionary<string, object> inputmsg = new Dictionary<string, object>();
@@ -33,11 +34,7 @@ namespace Validations
             inputmsg["string"] = "true";
             inputmsg["schedulearray"] = new string[] {"int","float"};
 
-            
-            
-            
-            
-           
+                                          
 
             IDictionary<string, string> inputrule = new Dictionary<string, string>();
             inputrule["firstname"] = "max:10|required";
@@ -48,37 +45,40 @@ namespace Validations
             inputrule["url"] = "required|url";
             inputrule["ip"]="required|ip";
             inputrule["digits"] = "required|digits|digitbetween:0-1|lessthan:100|greaterthan:150|greaterthanorequal:190";
-            inputrule["number"] = "numeric|greaterthan:10|lessthanorequal:0|min:10";
+            inputrule["number"] = "numeric|greaterthan:10|lessthanorequal:0|min:10|integer";
             inputrule["string"] = "boolean|stringcheck|size:65";
-            inputrule["schedulearray"] = "array|arraylength:5";
+            inputrule["schedulearray"] = "array|arraylength:5|arraytype:string";
+
 
 
             IDictionary<string, string> customizedmessages = new Dictionary<string, string>{
-           { "firstname.required" , "Please Enter name."},
-           {"firstname.max", "Name should not exist 10 character."},
-           {"Lastname.max", "Name should not exist 10 character."},
-           {"Lastname.required","Please Enter name."}
-            };
+             { "firstname.required" , "Please Enter name."},
+             {"firstname.max", "Name should not exist 10 character."},
+             {"Lastname.max", "Name should not exist 10 character."},
+             {"Lastname.required","Please Enter name."}  };
+          
 
 
             
            var resobj = Validator.Validate(inputmsg,inputrule,customizedmessages);
 
-           Console.WriteLine(resobj);
+           Console.WriteLine(resobj["firstname"][1]);
 
-            /*foreach (KeyValuePair<string, List<string>> item in outputerrors)
+
+          foreach (KeyValuePair<string, List<string>> item in resobj.Errorkeyvalues)
             {
-                Console.WriteLine(" {0}=>:{1}", item.Key, string.Join(",", item.Value));
-            }*/
-
-             Console.ReadLine();
+               Console.WriteLine(" {0}=>:{1}", item.Key, string.Join(",", item.Value));
+            }
+            Console.ReadLine();
 
 
         }
     }
-    public class Validator 
+    public class Validator
     {
-        Dictionary<string, List<string>> outputerrors = new Dictionary<string, List<string>> { };
+        public List<string> values;
+        public string KEY = "firstname";
+        private Dictionary<string, List<string>> outputerrors = new Dictionary<string, List<string>> { };
         private List<string> oldValue = new List<string>();
         private string msgRule;
         private string msgvalue;
@@ -88,7 +88,7 @@ namespace Validations
         {
             required, max, email, mobilenumber, date, url, ip, digits, dateformat, after,
             afterorequal, before, beforeorequal, between, numeric, digitbetween, dateequals, greaterthan, lessthan,
-            lessthanorequal, greaterthanorequal, min, boolean, stringcheck, size, regex, array, arraylength
+            lessthanorequal, greaterthanorequal, min, boolean, stringcheck, size, regex, array, arraylength,arraytype,integer
         };
 
 
@@ -148,7 +148,12 @@ namespace Validations
 
           {commonerrormesgs.array,"The {{fieldname}} is not an array"},
 
-          {commonerrormesgs.arraylength,"The {{fieldname}} is not given length"},           
+          {commonerrormesgs.arraylength,"The {{fieldname}} is not given length"}, 
+          
+          {commonerrormesgs.arraytype,"The {{fieldname}} is not given type"},
+
+          {commonerrormesgs.integer,"The {{fieldname}} is not an integer"}
+
 
         };
 
@@ -164,7 +169,7 @@ namespace Validations
         {
             
             Validator obj = new Validator();
-
+           
             obj.customizedmessages = customizedmessages;
 
             string[] validatevalueKey = validateValue.Keys.ToArray();
@@ -335,7 +340,16 @@ namespace Validations
 
                                 obj.Arraylength(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDecimal(lettersnums[1]));
                                 break;
+
+                            case commonerrormesgs.arraytype:
+
+                                obj.Arraytype(validatevalueval[i], validatevalueKey[i], lettersnums[1]);
+                                break;
                          
+                            case commonerrormesgs.integer:
+
+
+                                break;
                         }
                     }
                 }
@@ -345,9 +359,26 @@ namespace Validations
         }
 
 
+         public List<string> this[string KEY] 
+        {
+            get{
+
+              if(  outputerrors.ContainsKey(KEY))
+              {
+                  
+                outputerrors.TryGetValue(KEY, out values);
+                return values;
+              }
+                else
+                {
+                    return new List<string>();
+                }
+            }
+            
+        }
 
 
-       public bool  Haserror
+         public bool  Haserror
         {
             get
             {
@@ -356,7 +387,8 @@ namespace Validations
         }
 
 
-       public List<string> Errorkeys
+
+         public List<string> Errorkeys
        {
            get
            {
@@ -366,20 +398,24 @@ namespace Validations
        }
 
 
-       public List<string>[] Errorvalues
+
+
+         public List<string>[] Errorvalues
        {
            get
            {
                return outputerrors.Values.ToArray();
            }
        }
-      public Dictionary<string ,List<string>> Errorkeyvalues
+
+
+        public Dictionary<string ,List<string>> Errorkeyvalues
       {
           get
           {
               return outputerrors;
           }
-    }
+      }
 
 
 
@@ -1720,8 +1756,99 @@ namespace Validations
 
 
 
-       
+        private void Arraytype(object  inputmsgvalue, string inputmsgkey, string type)
+        {
 
+            string Arraytyperrormsgs;
+            errormessages.TryGetValue(commonerrormesgs.arraytype, out Arraytyperrormsgs);
+            object aa = (object)type;
+            Type valuesType = aa.GetType();
+            Type valueType = inputmsgvalue.GetType();
+
+            if ((inputmsgvalue.GetType().IsAssignableFrom(valuesType)) == true)
+            {
+            }
+            else{
+                msgRule = string.Concat(inputmsgkey, dot, "arraytype");
+
+                if (customizedmessages.ContainsKey(msgRule))
+                {
+                    customizedmessages.TryGetValue(msgRule, out msgvalue);
+                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
+                    {
+
+                        oldValue.Add(msgvalue);
+
+                    }
+                    else
+                    {
+                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
+                    }
+                }
+
+                else if (outputerrors.ContainsKey(inputmsgkey))
+                {
+                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
+                    {
+                        oldValue.Add(Arraytyperrormsgs.Replace("{{fieldname}}", inputmsgkey));
+                    }
+                }
+                else
+                {
+                    outputerrors.Add(inputmsgkey, new List<string> { Arraytyperrormsgs.Replace("{{fieldname}}", inputmsgkey) });
+                }
+            }
+        }
+
+
+        private void Integer(string inputmsgvalue, string inputmsgkey)
+        {
+            string Integerrrormsgs;
+            errormessages.TryGetValue(commonerrormesgs.integer, out Integerrrormsgs);
+
+
+            int value;
+            if (int.TryParse(inputmsgvalue, out value))
+            {
+            }
+            else{
+                msgRule = string.Concat(inputmsgkey, dot, "integer");
+
+                if (customizedmessages.ContainsKey(msgRule))
+                {
+                    customizedmessages.TryGetValue(msgRule, out msgvalue);
+                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
+                    {
+
+                        oldValue.Add(msgvalue);
+
+                    }
+                    else
+                    {
+                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
+                    }
+                }
+
+                else if (outputerrors.ContainsKey(inputmsgkey))
+                {
+                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
+                    {
+                        oldValue.Add(Integerrrormsgs.Replace("{{fieldname}}", inputmsgkey));
+                    }
+                }
+                else
+                {
+                    outputerrors.Add(inputmsgkey, new List<string> { Integerrrormsgs.Replace("{{fieldname}}", inputmsgkey) });
+                }
+            }
+
+
+
+
+
+
+
+        }
 
 
 
