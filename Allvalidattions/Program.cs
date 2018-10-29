@@ -16,38 +16,38 @@ namespace Validations
 
     public class BaseIValidator
     {
-        public void Validate(IValidator validators)
+        public void RSValidate(IValidator RSvalidators)
         {
 
             IDictionary<string, List<string>> outputerrors = new Dictionary<string, List<string>> { };
 
             IDictionary<string, object> inputmsg = new Dictionary<string, object>();
-            inputmsg["firstname"] = "";
+            inputmsg["firstname"] = "rr";
             inputmsg["Lastname"] = "Thangamani";
-            inputmsg["email"] = "gowtham@rajasr.com";
-            inputmsg["mn"] = "9488220623";
-            inputmsg["DOB"] = "1991.10.13";
+            inputmsg["email"] = "gowthamrajasr.com";
+            inputmsg["mn"] = "9488226229";
+            inputmsg["DOB"] = "1991.10.14";
             inputmsg["url"] = "https://www.google.com/";
             inputmsg["ip"]="192.168.1.0";
-            inputmsg["digits"] = "1";
-            inputmsg["number"] = "1.566";
+            inputmsg["digits"] = "23";
+            inputmsg["number"] = "566";
             inputmsg["string"] = "true";
             inputmsg["schedulearray"] = new string[] {"int","float"};
 
                                           
 
             IDictionary<string, string> inputrule = new Dictionary<string, string>();
-            inputrule["firstname"] = "max:10|required";
+            inputrule["firstname"] = "required|max:10";
             inputrule["Lastname"] = "required|max:10|stringcheck|size:35|regex:[^a-zA-Z]+$";
             inputrule["email"] = "required|email";
-            inputrule["DOB"] = "required|date|dateformat:yyyy-MM-dd|after:1993.10.13|afterorequal:1991.10.14|before:1991.10.12|beforeorequal:1991.10.12|between:1991.10.14-1992.10.13|dateequals:1991.10.14";
-            inputrule["mn"] = "mobilenumber|required|max:10|digits";
+            inputrule["DOB"] = "required|date|dateformat:yyyy.MM.dd|after:1993.10.12|afterorequal:1991.10.13|before:1991.10.18|beforeorequal:1991.10.13|between:1991.10.14-1992.10.13|dateequals:1991.10.14";
+            inputrule["mn"] = "number|max:10|digits";
             inputrule["url"] = "required|url";
             inputrule["ip"]="required|ip";
             inputrule["digits"] = "required|digits|digitbetween:0-1|lessthan:100|greaterthan:150|greaterthanorequal:190";
             inputrule["number"] = "numeric|greaterthan:10|lessthanorequal:0|min:10|integer";
             inputrule["string"] = "boolean|stringcheck|size:65";
-            inputrule["schedulearray"] = "array|arraylength:5|arraytype:string";
+            inputrule["schedulearray"] = "array|arraylength:5|arraytype:int[]";
 
 
 
@@ -55,17 +55,19 @@ namespace Validations
              { "firstname.required" , "Please Enter name."},
              {"firstname.max", "Name should not exist 10 character."},
              {"Lastname.max", "Name should not exist 10 character."},
-             {"Lastname.required","Please Enter name."}  };
+             {"Lastname.required","Please Enter name."},
+            // {"email.email","incorrect"}
+            };
           
 
 
             
-           var resobj = Validator.Validate(inputmsg,inputrule,customizedmessages);
+           var resobj = RSValidator.RSValidate(inputmsg,inputrule,customizedmessages);
 
-           Console.WriteLine(resobj["firstname"][1]);
+           Console.WriteLine(resobj);
 
 
-          foreach (KeyValuePair<string, List<string>> item in resobj.Errorkeyvalues)
+          foreach (KeyValuePair<string, List<string>> item in resobj.ErrorkeyValues)
             {
                Console.WriteLine(" {0}=>:{1}", item.Key, string.Join(",", item.Value));
             }
@@ -74,8 +76,10 @@ namespace Validations
 
         }
     }
-    public class Validator
+    public class RSValidator
     {
+      
+        bool result = new bool();
         public List<string> values;
         public string KEY = "firstname";
         private Dictionary<string, List<string>> outputerrors = new Dictionary<string, List<string>> { };
@@ -86,7 +90,7 @@ namespace Validations
          
         public enum commonerrormesgs
         {
-            required, max, email, mobilenumber, date, url, ip, digits, dateformat, after,
+            required, max, email, number, date, url, ip, digits, dateformat, after,
             afterorequal, before, beforeorequal, between, numeric, digitbetween, dateequals, greaterthan, lessthan,
             lessthanorequal, greaterthanorequal, min, boolean, stringcheck, size, regex, array, arraylength,arraytype,integer
         };
@@ -100,7 +104,7 @@ namespace Validations
 
           {commonerrormesgs.email,"The {{fieldname}} is incorrect"},
 
-          {commonerrormesgs.mobilenumber,"The {{fieldname}} is incorrect"},
+          {commonerrormesgs.number,"The {{fieldname}} is incorrect"},
 
           {commonerrormesgs.date,"The {{fieldname}} is incorrect"},
 
@@ -152,7 +156,7 @@ namespace Validations
           
           {commonerrormesgs.arraytype,"The {{fieldname}} is not given type"},
 
-          {commonerrormesgs.integer,"The {{fieldname}} is not an integer"}
+         {commonerrormesgs.integer,"The {{fieldname}} is not an integer"}
 
 
         };
@@ -165,11 +169,11 @@ namespace Validations
 
         IDictionary<string, string> customizedmessages;
 
-        public static Validator Validate(IDictionary<string, object> validateValue, IDictionary<string, string> validationRule, IDictionary<string, string> customizedmessages)
+        public static RSValidator RSValidate(IDictionary<string, object> validateValue, IDictionary<string, string> validationRule, IDictionary<string, string> customizedmessages)
         {
             
-            Validator obj = new Validator();
-           
+            RSValidator obj = new RSValidator();
+            
             obj.customizedmessages = customizedmessages;
 
             string[] validatevalueKey = validateValue.Keys.ToArray();
@@ -198,75 +202,122 @@ namespace Validations
 
 
                         string[] lettersnums = Ruleslist[j].Split(':');
-                        commonerrormesgs errorkey = (commonerrormesgs)Enum.Parse(typeof(commonerrormesgs), lettersnums[0]);
 
-                        switch (errorkey)
+                        commonerrormesgs ErrorKey = (commonerrormesgs)Enum.Parse(typeof(commonerrormesgs), lettersnums[0]);
+
+                        switch (ErrorKey)
                         {
                             case commonerrormesgs.required:
 
-                               obj.Required(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
-                                break;
+                                if (!obj.HasValue(Convert.ToString(validatevalueval[i])))
+                               
+                                    obj.CustomMessages(validatevalueKey[i], ErrorKey);
+                                
+                                else break; 
+                                break;                         
+                             
 
                             case commonerrormesgs.max:
 
-                              obj.Max(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
-                                break;
+                                if (obj.Max(Convert.ToString(validatevalueval[i]), lettersnums[1]))
+                                
+
+                                    obj.CustomMessages(validatevalueKey[i], ErrorKey);
+                                
+                                else break; 
+
+                                 break;
 
                             case commonerrormesgs.email:
 
-                               obj.Email(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
+                                 if (obj.Email(Convert.ToString(validatevalueval[i])))
+                                     obj.CustomMessages(validatevalueKey[i], ErrorKey);
+
+                                 else break;
+
                                 break;
 
-                            case commonerrormesgs.mobilenumber:
+                            case commonerrormesgs.number:
+                                if (obj.IsNumber(Convert.ToString(validatevalueval[i])))
+                                  obj.CustomMessages(validatevalueKey[i], ErrorKey);
 
-                                obj.mobilenumber(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
-                                break;
+                              else break;
 
+                              break;
                             case commonerrormesgs.date:
 
-                                obj.Date(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
-                                break;
+                              if (obj.IsDate(Convert.ToString(validatevalueval[i])))
+                                  obj.CustomMessages(validatevalueKey[i], ErrorKey);
+
+                              else break;
+                               break;
 
                             case commonerrormesgs.url:
 
-                                obj.URL(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
+                               if( obj.URL(Convert.ToString(validatevalueval[i])))
+                                  obj.CustomMessages(validatevalueKey[i], ErrorKey);
+                               else break;
                                 break;
 
                             case commonerrormesgs.ip:
-                                obj.IPadd(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
+                                if (obj.IPadd(Convert.ToString(validatevalueval[i])))
+                                    obj.CustomMessages(validatevalueKey[i], ErrorKey);
+                                else break;
                                 break;
 
                             case commonerrormesgs.digits:
 
-                                obj.Digits(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
+                                if (obj.Digits(Convert.ToString(validatevalueval[i])))
+                                    obj.CustomMessages(validatevalueKey[i], ErrorKey);
+                                else break;
                                 break;
 
                             case commonerrormesgs.dateformat:
 
-                                obj.Dateformat(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                                if (obj.Dateformat(Convert.ToString(validatevalueval[i]), lettersnums[1]) == true)
+                                {
+                                    obj.CustomMessages(validatevalueKey[i], ErrorKey);
+                                }
+                                else break;
                                 break;
 
                             case commonerrormesgs.after:
-                                obj.After(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
+                                if (obj.After(Convert.ToString(validatevalueval[i]), Convert.ToDateTime(lettersnums[1]))==true)
+                                    obj.CustomMessages(validatevalueKey[i], ErrorKey);
+
+                                else break;
                                 break;
                             case commonerrormesgs.afterorequal:
 
-                                obj.Afterorequal(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
+                                if (obj.AfterOrEqual(Convert.ToString(validatevalueval[i]), Convert.ToDateTime(lettersnums[1])))
+                                    obj.CustomMessages(validatevalueKey[i], ErrorKey);
+
+                                else break;
+
                                 break;
 
                             case commonerrormesgs.before:
 
-                                obj.Before(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
+                                if (obj.Before(Convert.ToString(validatevalueval[i]), Convert.ToDateTime(lettersnums[1])))
+                                    obj.CustomMessages(validatevalueKey[i], ErrorKey);
+                                else break;
+                                    
                                 break;
 
                             case commonerrormesgs.beforeorequal:
 
-                                obj.Beforeorequal(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
+                                if (obj.Beforeorequal(Convert.ToString(validatevalueval[i]), Convert.ToDateTime(lettersnums[1])))
+                                    obj.CustomMessages(validatevalueKey[i], ErrorKey);
+                                else break;
                                 break;
 
                             case commonerrormesgs.between:
 
-                                obj.Between(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                                if (obj.Between(Convert.ToString(validatevalueval[i]), lettersnums[1]))
+                                {
+                                    obj.CustomMessages(validatevalueKey[i], ErrorKey);
+                                }
+                                else break;
                                 break;
 
                             case commonerrormesgs.numeric:
@@ -276,32 +327,44 @@ namespace Validations
 
                             case commonerrormesgs.digitbetween:
 
-                                obj.Digitbetween(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                               if( obj.Digitbetween(Convert.ToString(validatevalueval[i]),lettersnums[1]))
+                                   obj.CustomMessages(validatevalueKey[i], ErrorKey);
                                 break;
 
                             case commonerrormesgs.dateequals:
 
-                                obj.Dateequals(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDateTime(lettersnums[1]));
+                                if (obj.Dateequals(Convert.ToString(validatevalueval[i]), Convert.ToDateTime(lettersnums[1])))
+                                   
+                                    obj.CustomMessages(validatevalueKey[i], ErrorKey);
+                                else break;
+
                                 break;
 
                             case commonerrormesgs.greaterthan:
 
-                                obj.Greaterthan(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                               if( obj.Greaterthan(Convert.ToString(validatevalueval[i]), lettersnums[1]))
+                                   obj.CustomMessages(validatevalueKey[i], ErrorKey);
                                 break;
 
                             case commonerrormesgs.lessthan:
 
-                                obj.Lessthan(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                                if (obj.Lessthan(Convert.ToString(validatevalueval[i]), lettersnums[1]))
+                                    obj.CustomMessages(validatevalueKey[i], ErrorKey);
+                                else break;
                                 break;
 
                             case commonerrormesgs.lessthanorequal:
 
-                                obj.Lessthanorequal(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                                if (obj.Lessthanorequal(Convert.ToString(validatevalueval[i]), lettersnums[1]))
+                                    obj.CustomMessages(validatevalueKey[i], ErrorKey);
+                                else break;
                                 break;
 
                             case commonerrormesgs.greaterthanorequal:
 
-                                obj.Greaterthanorequal(Convert.ToString(validatevalueval[i]), validatevalueKey[i], lettersnums[1]);
+                                if (obj.Greaterthanorequal(Convert.ToString(validatevalueval[i]), lettersnums[1]))
+                                    obj.CustomMessages(validatevalueKey[i], ErrorKey);
+                                else break;
                                 break;
 
                             case commonerrormesgs.min:
@@ -341,14 +404,14 @@ namespace Validations
                                 obj.Arraylength(Convert.ToString(validatevalueval[i]), validatevalueKey[i], Convert.ToDecimal(lettersnums[1]));
                                 break;
 
-                            case commonerrormesgs.arraytype:
+                             case commonerrormesgs.arraytype:
 
                                 obj.Arraytype(validatevalueval[i], validatevalueKey[i], lettersnums[1]);
                                 break;
                          
-                            case commonerrormesgs.integer:
+                             case commonerrormesgs.integer:
 
-
+                                obj.Integer(Convert.ToString(validatevalueval[i]), validatevalueKey[i]);
                                 break;
                         }
                     }
@@ -378,7 +441,7 @@ namespace Validations
         }
 
 
-         public bool  Haserror
+         public bool  HasError
         {
             get
             {
@@ -387,8 +450,7 @@ namespace Validations
         }
 
 
-
-         public List<string> Errorkeys
+         public List<string> ErrorKeys
        {
            get
            {
@@ -398,9 +460,7 @@ namespace Validations
        }
 
 
-
-
-         public List<string>[] Errorvalues
+         public List<string>[] ErrorValues
        {
            get
            {
@@ -409,7 +469,7 @@ namespace Validations
        }
 
 
-        public Dictionary<string ,List<string>> Errorkeyvalues
+         public Dictionary<string ,List<string>> ErrorkeyValues
       {
           get
           {
@@ -421,684 +481,312 @@ namespace Validations
 
 
 
-       private void Required(string inputmsgvalue, string inputmsgkey)
+          bool HasRequired(string inputmsgValue)
+         {
+             return string.IsNullOrEmpty(inputmsgValue);
+         }
+
+        /// <summary>
+        /// Has values return true or else return false 
+        /// </summary>
+        /// <param name="inputmsgValue"></param>
+        /// <returns></returns>
+          bool HasValue(string inputmsgValue)
+          {
+              return !string.IsNullOrEmpty(inputmsgValue);
+          }
+          void CustomMessages(string inputmsgKey, commonerrormesgs errorKey)
+         {
+
+             string errormsgs;
+                 errormessages.TryGetValue(errorKey,out errormsgs);
+              
+             msgRule = string.Concat(inputmsgKey, dot, errorKey);
+
+             if(customizedmessages.ContainsKey(msgRule))
+             {
+                 customizedmessages.TryGetValue(msgRule, out msgvalue);
+
+                 if (outputerrors.TryGetValue(inputmsgKey, out oldValue))
+                 {
+                    oldValue.Add(msgvalue);
+                 }
+                 else
+                 {
+                     outputerrors.Add(inputmsgKey, new List<string> { msgvalue });
+                 }
+
+             }
+             else if (outputerrors.ContainsKey(inputmsgKey))
+             {
+                
+                 if (outputerrors.TryGetValue(inputmsgKey, out oldValue))
+                 {
+                     oldValue.Add(errormsgs.Replace("{{fieldname}}", inputmsgKey));
+                 }
+             }
+                 else
+                 {
+                     outputerrors.Add(inputmsgKey, new List<string> { errormsgs.Replace("{{fieldname}}", inputmsgKey) });
+                 }
+
+             }
+
+         
+        /// <summary>
+        /// if input not below the given number return true or else return false
+        /// </summary>
+        /// <param name="inputmsgValue"></param>
+        /// <param name="inputLength"></param>
+        /// <returns></returns>
+
+          bool Max(string inputmsgValue,string inputLength)
+         {
+             
+              if (!HasValue(inputmsgValue))
+                return false;
+
+               return !(inputmsgValue.Length >= Convert.ToDecimal(inputLength));
+
+          
+         }
+
+        /// <summary>
+        /// if email is incorrect return true or else return false
+        /// </summary>
+        /// <param name="inputmsgValue"></param>
+        /// <returns></returns>
+          bool Email(string inputmsgValue)
         {
-            string requirederrormgs;
-            errormessages.TryGetValue(commonerrormesgs.required, out requirederrormgs);
-
-            if (string.IsNullOrEmpty(inputmsgvalue))
-            {
-
-                msgRule = string.Concat(inputmsgkey, dot, "required");
-
-                if (customizedmessages.ContainsKey(msgRule))
-                {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                    
-
-                        oldValue.Add(msgvalue);
-
-                    }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
-
-
-                else if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                {
-
-                    
-                    oldValue.Add(requirederrormgs.Replace("{{fieldname}}", inputmsgkey));
-
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { requirederrormgs.Replace("{{fieldname}}", inputmsgkey) });
-                }
-            }
-
-        }
-
-
-
-        private void Max(string inputmsgvalue, string inputmsgkey, string inputlength)
-        {
-            string maxerrormsgs;
-            errormessages.TryGetValue(commonerrormesgs.max, out maxerrormsgs);
-
-            msgRule = string.Concat(inputmsgkey, dot, "max");
-
-            int valuelength = inputmsgvalue.Length;
-            decimal num = Convert.ToDecimal(inputlength);
-
-            if (valuelength < num)
-            {
-                if (customizedmessages.ContainsKey(msgRule))
-                {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-
-                    if (outputerrors.ContainsKey(inputmsgkey))
-                    {
-
-                        List<string> oldValue = new List<string>();
-
-                        if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                        {
-
-                            oldValue.Add(msgvalue);
-                        }
-                    }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
-
-
-                else
-                {
-
-                    if (outputerrors.ContainsKey(inputmsgkey))
-                    {
-
-                        List<string> oldValue = new List<string>();
-
-                        if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                        {
-
-
-                            oldValue.Add(maxerrormsgs.Replace("{{fieldname}}", inputmsgkey));
-
-
-                        }
-                    }
-                    else
-                    {
-
-                        outputerrors.Add(inputmsgkey, new List<string> { maxerrormsgs.Replace("{{fieldname}}", inputmsgkey) });
-                    }
-                }
-            }
-
-
-        }
-
-
-
-        private void Email(string inputmsgvalue, string inputmsgkey)
-        {
-            string emailerrormsgs;
-            errormessages.TryGetValue(commonerrormesgs.email, out emailerrormsgs);
+            if (!HasValue(inputmsgValue))
+                return false;
 
             Regex regex = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
-            Match match = regex.Match(inputmsgvalue);
+         
+     
+               Match match = regex.Match(inputmsgValue);
+               return !match.Success;
+              
+        }
 
-            if (match.Success)
-            { }
-            else
-            {
-                msgRule = string.Concat(inputmsgkey, dot, "email");
+/// <summary>
+/// Given number not satisfied given condition return true or else return false
+/// </summary>
+/// <param name="inputmsgValue"></param>
+/// <returns></returns>
+        bool IsNumber(string inputmsgValue)
+        {           
+            if (!HasValue(inputmsgValue))
+                return false;
 
-                if (customizedmessages.ContainsKey(msgRule))
-                {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(msgvalue);
-
-                    }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
+            Regex regex = new Regex(@"(?<!\d)\d{10}(?!\d)");
+            return !regex.IsMatch(inputmsgValue);
+            
+        }
 
 
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                        oldValue.Add(emailerrormsgs.Replace("{{fieldname}}", inputmsgkey));
+        /// <summary>
+        ///If Given input is not a date format return true or else return false
+        /// </summary>
+        /// <param name="inputmsgValue"></param>
+        /// <returns></returns>
+        bool IsDate(string inputmsgValue)
+        {
+            if (!HasValue(inputmsgValue))
+                return false;
 
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { emailerrormsgs.Replace("{{fieldname}}", inputmsgkey) });
-                }
-            }
 
+             var format = new[] { "yyyy.MM.dd", "yyyy-MM-dd", "yyyy/MM/dd" };
+             DateTime dt;
+            return  !(DateTime.TryParseExact((String)inputmsgValue, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt));
+
+               
         }
 
 
 
-        private void mobilenumber(string inputmsgvalue, string inputmsgkey)
+         bool URL(string inputmsgValue)
         {
-            string mnerrormsgs;
-            errormessages.TryGetValue(commonerrormesgs.mobilenumber, out mnerrormsgs);
-
-            var expr = new Regex(@"^((\+){0,1}91(\s){0,1}(\-){0,1}(\s){0,1}){0,1}9[0-9](\s){0,1}(\-){0,1}(\s){0,1}[1-9]{1}[0-9]{7}$");
-
-            if (expr.IsMatch(inputmsgvalue))
-            { }
-            else
-            {
-                msgRule = string.Concat(inputmsgkey, dot, "numeric");
-
-                if (customizedmessages.ContainsKey(msgRule))
-                {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(msgvalue);
-
-                    }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(mnerrormsgs.Replace("{{fieldname}}", inputmsgkey));
-
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { mnerrormsgs.Replace("{{fieldname}}", inputmsgkey) });
-                }
-            }
-
-        }
-
-
-
-        private void Date(string inputmsgvalue, string inputmsgkey)
-        {
-            string dateerrormsgs;
-            errormessages.TryGetValue(commonerrormesgs.date, out dateerrormsgs);
-
-            var format = new[] { "yyyy.MM.dd", "yyyy-MM-dd", "yyyy/MM/dd" };
-            DateTime dt;
-
-            if (DateTime.TryParseExact((String)inputmsgvalue, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-            {
-
-            }
-            else
-            {
-                msgRule = string.Concat(inputmsgkey, dot, "date");
-
-                if (customizedmessages.ContainsKey(msgRule))
-                {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(msgvalue);
-
-                    }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-                        oldValue.Add(dateerrormsgs.Replace("{{fieldname}}", inputmsgkey));
-
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { dateerrormsgs.Replace("{{fieldname}}", inputmsgkey) });
-                }
-            }
-
-        }
-
-
-
-       private void URL(string inputmsgvalue, string inputmsgkey)
-        {
-            string urlerrormsgs;
-            errormessages.TryGetValue(commonerrormesgs.url, out urlerrormsgs);
+            
 
             string pattern = @"^(http|https|ftp)\://[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._\?\,\'/\\\+&amp;%\$#\=~])*[^\.\,\)\(\s]$";
             Regex reg = new Regex(pattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-            if (reg.IsMatch(inputmsgvalue))
+            if (HasRequired(inputmsgValue) == false)
             {
+            result=reg.IsMatch(inputmsgValue);
+            
             }
-            else
-            {
-                msgRule = string.Concat(inputmsgkey, dot, "url");
-
-                if (customizedmessages.ContainsKey(msgRule))
-                {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(msgvalue);
-
-                    }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
-
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgvalue, out oldValue))
-                    {
-                        oldValue.Add(urlerrormsgs.Replace("{{fieldname}}", inputmsgkey));
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { urlerrormsgs.Replace("{{fieldname}}", inputmsgkey) });
-                }
-            }
+             return result;
 
         }
 
 
 
 
-        private void IPadd(string inputmsgvalue, string inputmsgkey)
+         bool IPadd(string inputmsgValue)
         {
-            string ipaddresserrormsgs;
-            errormessages.TryGetValue(commonerrormesgs.ip, out ipaddresserrormsgs);
-
             System.Net.IPAddress ipAddress = null;
-            if (System.Net.IPAddress.TryParse(inputmsgvalue, out ipAddress))
+            if (HasRequired(inputmsgValue) == false)
             {
-
+                result = System.Net.IPAddress.TryParse(inputmsgValue, out ipAddress);
             }
-            else
-            {
-                msgRule = string.Concat(inputmsgkey, dot, "ip");
-
-                if (customizedmessages.ContainsKey(msgRule))
-                {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(msgvalue);
-
-                    }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
-
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgvalue, out oldValue))
-                    {
-                        oldValue.Add(ipaddresserrormsgs.Replace("{{fieldname}}", inputmsgkey));
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { ipaddresserrormsgs.Replace("{{fieldname}}", inputmsgkey) });
-                }
-            }
-
+            return result;
         }
 
 
 
 
-        private void Digits(string inputmsgvalue, string inputmsgkey)
+         bool Digits(string inputmsgValue)
+         {
+             if (HasRequired(inputmsgValue))
+             {
+                 return true;
+             }
+             return !inputmsgValue.All(char.IsDigit);
+         }
+
+
+
+         bool Dateformat(string inputmsgValue, string format)
+         {
+             bool result = false;
+             DateTime dDate;
+             if (HasRequired(inputmsgValue) == false)
+             {
+                 if (IsDate(inputmsgValue) == false)
+                 {
+
+                     if (DateTime.TryParseExact(inputmsgValue, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out dDate))
+                     {
+
+                         //return System.Convert.ToBoolean(string.Format(format, dDate));
+                         
+
+                     }
+
+                 }
+                 
+
+             }
+             return result;
+         }
+
+         bool After(string inputmsgValue, DateTime date)
+         {
+             bool result = false;
+             DateTime Temp;
+             if (HasRequired(inputmsgValue) == false)
+             {
+                 if (IsDate(inputmsgValue) == false)
+                 {
+                     if (!(DateTime.TryParse(inputmsgValue, out Temp) == true && Temp.Date > date == true))
+                     {
+                         result= true;
+                     }
+                     
+                 }
+                 
+             }
+            return result;
+         }
+
+
+         bool AfterOrEqual(string inputmsgValue,DateTime date)
         {
-            string digitserrormsgs;
-            errormessages.TryGetValue(commonerrormesgs.digits, out digitserrormsgs);
 
-            if (inputmsgvalue.All(char.IsDigit))
-            {
-            }
-            else
-            {
-                msgRule = string.Concat(inputmsgkey, dot, "digits");
-
-                if (customizedmessages.ContainsKey(msgRule))
-                {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(msgvalue);
-
-                    }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
-
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                        oldValue.Add(digitserrormsgs.Replace("{{fieldname}}", inputmsgkey));
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { digitserrormsgs.Replace("{{fieldname}}", inputmsgkey) });
-                }
-            }
-
-        }
-
-
-
-        private void Dateformat(string inputmsgvalue, string inputmsgkey, string format)
-        {
-            string dateformaterrormsgs;
-            errormessages.TryGetValue(commonerrormesgs.dateformat, out dateformaterrormsgs);
-
-            DateTime dDate;
-            if (DateTime.TryParseExact(inputmsgvalue, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out dDate))
-            {
-                string.Format(format, dDate);
-            }
-            else
-            {
-                msgRule = string.Concat(inputmsgkey, dot, "dateformat");
-
-                if (customizedmessages.ContainsKey(msgRule))
-                {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(msgvalue);
-
-                    }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
-
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                        oldValue.Add(dateformaterrormsgs.Replace("{{fieldname}}", inputmsgkey));
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { dateformaterrormsgs.Replace("{{fieldname}}", inputmsgkey) });
-                }
-            }
-        }
-
-
-
-        private void After(string inputmsgvalue, string inputmsgkey, DateTime date)
-        {
-            string afterdate;
-            errormessages.TryGetValue(commonerrormesgs.after, out afterdate);
-
+            bool result = false;
             DateTime Temp;
-            if (DateTime.TryParse(inputmsgvalue, out Temp) == true && Temp.Date > date)
-            { }
-            else
+            if (HasRequired(inputmsgValue) == false)
             {
-                msgRule = string.Concat(inputmsgkey, dot, "after");
-
-                if (customizedmessages.ContainsKey(msgRule))
+                if (IsDate(inputmsgValue) == false)
                 {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
+                    if (!(DateTime.TryParse(inputmsgValue, out Temp) == true && Temp.Date >= date == true))
                     {
-
-
-                        oldValue.Add(msgvalue);
-
+                        result = true;
                     }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
+
                 }
 
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                        oldValue.Add(afterdate.Replace("{{fieldname}}", inputmsgkey));
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { afterdate.Replace("{{fieldname}}", inputmsgkey) });
-                }
             }
-
-
+            return result;
         }
 
 
-
-        private void Afterorequal(string inputmsgvalue, string inputmsgkey, DateTime date)
+        bool Before(string inputmsgValue, DateTime date)
         {
-            string afterorequal;
-            errormessages.TryGetValue(commonerrormesgs.afterorequal, out afterorequal);
-
+            bool result = false;
             DateTime Temp;
-            if (DateTime.TryParse(inputmsgvalue, out Temp) == true && Temp.Date >= date)
-            { }
-            else
+            if (HasRequired(inputmsgValue) == false)
             {
-                msgRule = string.Concat(inputmsgkey, dot, "afterorequal");
-
-                if (customizedmessages.ContainsKey(msgRule))
+                if (IsDate(inputmsgValue) == false)
                 {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
+                    if (!(DateTime.TryParse(inputmsgValue, out Temp) == true && Temp.Date < date == true))
                     {
-
-
-                        oldValue.Add(msgvalue);
-
+                        result = true;
                     }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
+
                 }
 
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                        oldValue.Add(afterorequal.Replace("{{fieldname}}", inputmsgkey));
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { afterorequal.Replace("{{fieldname}}", inputmsgkey) });
-                }
             }
-
+            return result;
         }
 
 
 
-        private void Before(string inputmsgvalue, string inputmsgkey, DateTime date)
-        {
-            string before;
-            errormessages.TryGetValue(commonerrormesgs.before, out before);
 
+        private bool Beforeorequal(string inputmsgValue, DateTime date)
+        {
+            bool result = false;
             DateTime Temp;
-            if (DateTime.TryParse(inputmsgvalue, out Temp) == true && Temp.Date < date)
-            { }
-            else
+            if (HasRequired(inputmsgValue) == false)
             {
-                msgRule = string.Concat(inputmsgkey, dot, "before");
-
-                if (customizedmessages.ContainsKey(msgRule))
+                if (IsDate(inputmsgValue) == false)
                 {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
+                    if (!(DateTime.TryParse(inputmsgValue, out Temp) == true && Temp.Date <= date == true))
                     {
-
-
-                        oldValue.Add(msgvalue);
-
+                        result = true;
                     }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
+
                 }
 
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                        oldValue.Add(before.Replace("{{fieldname}}", inputmsgkey));
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { before.Replace("{{fieldname}}", inputmsgkey) });
-                }
             }
-        }
-
-
-
-        private void Beforeorequal(string inputmsgvalue, string inputmsgkey, DateTime date)
-        {
-            string beforeorequal;
-            errormessages.TryGetValue(commonerrormesgs.beforeorequal, out beforeorequal);
-
-            DateTime Temp;
-
-            if (DateTime.TryParse(inputmsgvalue, out Temp) == true && Temp.Date <= date)
-            { }
-            else
-            {
-                msgRule = string.Concat(inputmsgkey, dot, "beforeorequal");
-
-                if (customizedmessages.ContainsKey(msgRule))
-                {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(msgvalue);
-
-                    }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
-
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                        oldValue.Add(beforeorequal.Replace("{{fieldname}}", inputmsgkey));
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { beforeorequal.Replace("{{fieldname}}", inputmsgkey) });
-                }
-            }
+            return result;
         }
 
 
 
 
-        private void Between(string inputmsgvalue, string inputmsgkey, string date)
+        private bool Between(string inputmsgValue,string date)
         {
+
+            bool result = false;
             string[] dates = date.Split('-');
             DateTime startdate = Convert.ToDateTime(dates[0]);
             DateTime enddate = Convert.ToDateTime(dates[1]);
 
-            string between;
-            errormessages.TryGetValue(commonerrormesgs.between, out between);
 
+           
             DateTime Temp;
-            if (DateTime.TryParse(inputmsgvalue, out Temp) == true && Temp.Date >= startdate && Temp.Date <= enddate)
-            { }
-            else
+            if (HasRequired(inputmsgValue) == false)
             {
-                msgRule = string.Concat(inputmsgkey, dot, "beforeorequal");
-
-                if (customizedmessages.ContainsKey(msgRule))
+                if (IsDate(inputmsgValue) == false)
                 {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(msgvalue);
-
+                    if(! (DateTime.TryParse(inputmsgValue, out Temp) == true && Temp.Date >= startdate && Temp.Date <= enddate))
+                    { 
+                        result = true; 
                     }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
-
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                        oldValue.Add(between.Replace("{{fieldname}}", inputmsgkey));
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { between.Replace("{{fieldname}}", inputmsgkey) });
                 }
             }
-
+            return result;
+           
         }
 
 
 
         private void Numeric(string inputmsgvalue, string inputmsgkey)
         {
+
+
             string numericerrormsgs;
             errormessages.TryGetValue(commonerrormesgs.numeric, out numericerrormsgs);
             double myNum = 0;
@@ -1145,329 +833,161 @@ namespace Validations
 
 
 
-        private void Digitbetween(string inputmsgvalue, string inputmsgkey, string digits)
+        private bool Digitbetween(string inputmsgvalue, string digits)
         {
-            string Digitbetweenerrormsgs;
-            errormessages.TryGetValue(commonerrormesgs.digitbetween, out Digitbetweenerrormsgs);
+            bool result = false;
 
-            string[] Digits = digits.Split('-');
-            char startdigit = Convert.ToChar(Digits[0]);
-            char enddigit = Convert.ToChar(Digits[1]);
-
-            foreach (char c in inputmsgvalue)
+            string[] digit = digits.Split('-');
+            char startdigit = Convert.ToChar(digit[0]);
+            char enddigit = Convert.ToChar(digit[1]);
+            if (HasRequired(inputmsgvalue) == false)
             {
-
-                if (c >= startdigit && c <= enddigit)
+                if (Digits(inputmsgvalue) == false)
                 {
-
-                    continue;
-                }
-
-                else
-                {
-                    msgRule = string.Concat(inputmsgkey, dot, "digitbetween");
-
-                    if (customizedmessages.ContainsKey(msgRule))
+                    foreach (char c in inputmsgvalue)
                     {
-                        customizedmessages.TryGetValue(msgRule, out msgvalue);
-                        if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
+                        if (c >= startdigit && c <= enddigit)
                         {
-                            oldValue.Add(msgvalue);
-
+                            continue;
                         }
+
                         else
                         {
-                            outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
+                            result = true;
                         }
-                    }
 
-                    else if (outputerrors.ContainsKey(inputmsgkey))
-                    {
-                        if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                        {
-                            oldValue.Add(Digitbetweenerrormsgs.Replace("{{fieldname}}", inputmsgkey));
-                        }
-                    }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { Digitbetweenerrormsgs.Replace("{{fieldname}}", inputmsgkey) });
                     }
                 }
             }
+
+            return result;
         }
 
 
 
-
-        private void Dateequals(string inputmsgvalue, string inputmsgkey, DateTime date)
+        private bool Dateequals(string inputmsgValue, DateTime date)
         {
-            string Dateequals;
-            errormessages.TryGetValue(commonerrormesgs.dateequals, out Dateequals);
-
+            bool result = false;
             DateTime Temp;
-
-            if (DateTime.TryParse(inputmsgvalue, out Temp) == true && Temp.Date == date)
-            { }
-            else
+            if (HasRequired(inputmsgValue) == false)
             {
-                msgRule = string.Concat(inputmsgkey, dot, "beforeorequal");
-
-                if (customizedmessages.ContainsKey(msgRule))
+                if (IsDate(inputmsgValue) == false)
                 {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
+                    if (!(DateTime.TryParse(inputmsgValue, out Temp) == true && Temp.Date == date))
+                    { result = true; }
 
-
-                        oldValue.Add(msgvalue);
-
-                    }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
-
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                        oldValue.Add(Dateequals.Replace("{{fieldname}}", inputmsgkey));
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { Dateequals.Replace("{{fieldname}}", inputmsgkey) });
                 }
             }
-
+            return result;
         }
 
-
-
-        private void Lessthan(string inputmsgvalue, string inputmsgkey, string number)
+        private bool Lessthan(string inputmsgvalue,string number)
         {
-            string Lessthan;
-            errormessages.TryGetValue(commonerrormesgs.lessthan, out Lessthan);
+            bool result = false;
             decimal temp = decimal.Parse(inputmsgvalue);
             decimal num = decimal.Parse(number);
-            if (temp < num)
-            { }
-            else
+            if (HasRequired(inputmsgvalue) == false)
             {
-                msgRule = string.Concat(inputmsgkey, dot, "lessthan");
-
-                if (customizedmessages.ContainsKey(msgRule))
+                if (Digits(inputmsgvalue) == false)
                 {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(msgvalue);
-
-                    }
+                    if (temp < num)
+                    { }
                     else
                     {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
 
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                        oldValue.Add(Lessthan.Replace("{{fieldname}}", inputmsgkey));
+                        result = true;
                     }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { Lessthan.Replace("{{fieldname}}", inputmsgkey) });
                 }
             }
-
+            return result;
         }
 
 
 
-        private void Greaterthan(string inputmsgvalue, string inputmsgkey, string number)
+        private bool Greaterthan(string inputmsgvalue,string number)
         {
-            string Greaterthan;
-            errormessages.TryGetValue(commonerrormesgs.greaterthan, out Greaterthan);
+            bool result = false;
             decimal temp = decimal.Parse(inputmsgvalue);
             decimal num = decimal.Parse(number);
-            if (temp > num)
-            { }
-            else
+            if (HasRequired(inputmsgvalue) == false)
             {
-                msgRule = string.Concat(inputmsgkey, dot, "greaterthan");
-
-                if (customizedmessages.ContainsKey(msgRule))
-                {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(msgvalue);
-
-                    }
+                
+                    if (temp > num)
+                    { }
                     else
                     {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
+                        result = true;
                     }
-                }
-
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                        oldValue.Add(Greaterthan.Replace("{{fieldname}}", inputmsgkey));
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { Greaterthan.Replace("{{fieldname}}", inputmsgkey) });
-                }
+                
             }
+            return result;      
         }
 
 
 
 
-        private void Lessthanorequal(string inputmsgvalue, string inputmsgkey, string number)
+        private bool Lessthanorequal(string inputmsgvalue, string number)
         {
-            string Lessthanorequal;
-            errormessages.TryGetValue(commonerrormesgs.lessthanorequal, out Lessthanorequal);
+            bool result = false;
             decimal temp = decimal.Parse(inputmsgvalue);
             decimal num = decimal.Parse(number);
-            if (temp <= num)
-            { }
-            else
+            if (HasRequired(inputmsgvalue) == false)
             {
-                msgRule = string.Concat(inputmsgkey, dot, "lessthanorequal");
-
-                if (customizedmessages.ContainsKey(msgRule))
-                {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(msgvalue);
-
+                if (temp <= num)
+                 { }
+                  else
+                   {
+                        result = true;
                     }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
-
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                        oldValue.Add(Lessthanorequal.Replace("{{fieldname}}", inputmsgkey));
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { Lessthanorequal.Replace("{{fieldname}}", inputmsgkey) });
-                }
+                
             }
+            return result;
 
         }
 
 
 
-        private void Greaterthanorequal(string inputmsgvalue, string inputmsgkey, string number)
+        private bool Greaterthanorequal(string inputmsgvalue, string number)
         {
-            string Greaterthanorequal;
-            errormessages.TryGetValue(commonerrormesgs.greaterthanorequal, out Greaterthanorequal);
+            
             decimal temp = decimal.Parse(inputmsgvalue);
             decimal num = decimal.Parse(number);
-            if (temp >= num)
-            { }
-            else
+
+            if (HasRequired(inputmsgvalue) == false)
             {
-                msgRule = string.Concat(inputmsgkey, dot, "greaterthanorequal");
-
-                if (customizedmessages.ContainsKey(msgRule))
-                {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(msgvalue);
-
-                    }
+                if (temp >= num)
+                    { }
                     else
                     {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
+                        result = true;
                     }
-                }
-
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                        oldValue.Add(Greaterthanorequal.Replace("{{fieldname}}", inputmsgkey));
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { Greaterthanorequal.Replace("{{fieldname}}", inputmsgkey) });
-                }
+                
             }
+            return result;
         }
 
 
 
-        private void Min(string inputmsgvalue, string inputmsgkey, decimal min)
+        private bool Min(string inputmsgValue, string inputmsgkey, decimal min)
         {
 
-            string Minerrormsgs;
-            errormessages.TryGetValue(commonerrormesgs.min, out Minerrormsgs);
-            int valuelength = inputmsgvalue.Length;
+           
+            int valuelength = inputmsgValue.Length;
             decimal num = Convert.ToDecimal(valuelength);
-            decimal inputvalue = decimal.Parse(inputmsgvalue);
-            if (num >= min)
+            decimal inputvalue = decimal.Parse(inputmsgValue);
+            if (HasRequired(inputmsgValue) == false)
             {
+
+                if (num >= min)
+                { }
+
+                else { result = true; }
             }
-            else
-            {
-                msgRule = string.Concat(inputmsgkey, dot, "min");
-
-                if (customizedmessages.ContainsKey(msgRule))
-                {
-                    customizedmessages.TryGetValue(msgRule, out msgvalue);
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-
-
-                        oldValue.Add(msgvalue);
-
-                    }
-                    else
-                    {
-                        outputerrors.Add(inputmsgkey, new List<string> { msgvalue });
-                    }
-                }
-
-                else if (outputerrors.ContainsKey(inputmsgkey))
-                {
-                    if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
-                    {
-                        oldValue.Add(Minerrormsgs.Replace("{{fieldname}}", inputmsgkey));
-                    }
-                }
-                else
-                {
-                    outputerrors.Add(inputmsgkey, new List<string> { Minerrormsgs.Replace("{{fieldname}}", inputmsgkey) });
-                }
-            }
+            return true;
         }
+            
+       
+        
 
 
 
@@ -1761,12 +1281,17 @@ namespace Validations
 
             string Arraytyperrormsgs;
             errormessages.TryGetValue(commonerrormesgs.arraytype, out Arraytyperrormsgs);
-            object aa = (object)type;
-            Type valuesType = aa.GetType();
-            Type valueType = inputmsgvalue.GetType();
 
-            if ((inputmsgvalue.GetType().IsAssignableFrom(valuesType)) == true)
+            object aa = (object)type.ToArray();
+        
+            Type ExpectedType = aa.GetType();
+
+            Type inputType = inputmsgvalue.GetType();
+            if (inputType.Equals(aa))   
+
+            if (inputType.GetType().IsAssignableFrom(ExpectedType))
             {
+                      
             }
             else{
                 msgRule = string.Concat(inputmsgkey, dot, "arraytype");
@@ -1774,6 +1299,7 @@ namespace Validations
                 if (customizedmessages.ContainsKey(msgRule))
                 {
                     customizedmessages.TryGetValue(msgRule, out msgvalue);
+
                     if (outputerrors.TryGetValue(inputmsgkey, out oldValue))
                     {
 
@@ -1850,14 +1376,18 @@ namespace Validations
 
         }
 
-
-
+       
 
 
 
 
     }
 
+
+    class RSValaditionExcetpiotn : Exception
+    {
+
+    }
 
 
 
@@ -1869,7 +1399,7 @@ namespace Validations
         public static void Main(string[] args)
         {
             BaseIValidator baseValidaor = new BaseIValidator();
-            baseValidaor.Validate(null);
+            baseValidaor.RSValidate(null);
 
 
         }
