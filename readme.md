@@ -1,27 +1,28 @@
-                                                                  VALIDATIONS
-Requirement:
+# VALIDATION
+
+## Requirement:
      .Net framework 4.
-Installation:
+## Installation:
     Add Reference.
-Documentation:
-   Inputs:
+## Documentation:
+  #### Inputs:
        Input Messages:
-             Input messages are dictionary format. Here keys are string and        corresponding values are object.
-      Input Rules:
+             Input messages are dictionary format. Here keys are string and corresponding values are object.
+       Input Rules:
              Input rules are also dictionary format. Here keys and values both are string.
-    Custom Messages:
+       Custom Messages:
            This is in dictionary format. Here keys are input keys and values are having
 Custom error messages for corresponding keys.
-List of Validations:
-      Required:
+#### List of Validations:
+       Required:
            Here this method checks if input has value return true or else return false.
-      Regular Expressions:
+       Regular Expressions:
              Here this method check whether input is match with given pattern or not.
 If it is match return true or else return false.
-Outputs:
+## Outputs:
 This is in dictionary format. Keys and values both are string. Values are having error messages for corresponding keys.
-For Example:
-Input messages are given like IDictionary<string, object> InputMessage        = new Dictionary<string, object>();
+## For Example:
+Input messages are given like <`IDictionary<string, object> InputMessage = new Dictionary<string, object>()`>.
     
 Input rules are given like  IDictionary<string, string> InputRule = new Dictionary<string, string>();
    
