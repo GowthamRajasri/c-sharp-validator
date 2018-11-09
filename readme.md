@@ -22,22 +22,34 @@ If it is match return true or else return false.
 ## Outputs:
 This is in dictionary format. Keys and values both are string. Values are having error messages for corresponding keys.
 ## For Example:
-Input messages are given like` Dictionary<string, object> InputMessage = new Dictionary<string, object>()`.
+*``` //Input messages are given like,```*
+
+` Dictionary<string, object> InputMessage = new Dictionary<string, object>()`.
     
-Input rules are given like `Dictionary<string, string> InputRule = new Dictionary<string, string>()`.
+*```//Input rules are given like,```*
+
+`Dictionary<string, string> InputRule = new Dictionary<string, string>()`.
    
-Custom messages are given like `Dictionary<string, string> CustomMessages = new Dictionary<string, string>()`.
+*```//Custom messages are given like,```*
 
-These inputs are passing as parameter like `var resultObj = RSValidator.RSValidate(InputMessage,InputRule,CustomMessages)`.
+`Dictionary<string, string> CustomMessages = new Dictionary<string, string>()`.
 
-And get input keys and corresponding  values and validation rules .
+*```//These inputs are passing as parameter like,```*
 
-Split the rules using `(string[] Ruleslist = ruleslwr.Split('|'))`.
+`var resultObj = RSValidator.RSValidate(InputMessage,InputRule,CustomMessages)`.
 
-using switch case detect which validation and call that method.
+And get input keys and corresponding  values and validation rules using methods.
+
+*```//Split the rules using,```*
+
+`(string[] Ruleslist = ruleslwr.Split('|'))`.
+
+Using switch case detect which validation and call that method.
 
 If  Required validation ,call method of`(obj.HasValue(Convert.ToString(validatevalueval[i]))` this method return when input has value or else return false.
 
 If  this method return false it has error ,so call error messages method  to throw an error `(obj.CustomMessages(validatevalueKey[i], ErrorKey)`.Like this other validation has to done.
 
-Error output is dictionary format`(Dictionary<string, string> OutputErrors = new Dictionary<string, string> { })`.
+*```//Error output is dictionary format```*
+
+`(Dictionary<string, string> OutputErrors = new Dictionary<string, string> { })`.
