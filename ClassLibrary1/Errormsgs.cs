@@ -10,9 +10,7 @@ namespace Errormessages
 
     public class CommonErrors
     {
-        private string msgRule;
-        private string msgValue;
-        private string dot = ".";
+       
 
 
 
@@ -22,9 +20,11 @@ namespace Errormessages
          {commonerrormesgs.required,"The {{fieldname}} must be required "},
          {commonerrormesgs.regex,"The {{fieldname}} is not given pattern"},};
 
-        public void CustomMessages(string inputMsgKey, commonerrormesgs errorKey, IDictionary<string, string> customizedMessages)
+        public void GetErrorMessages(string inputMsgKey, commonerrormesgs errorKey, IDictionary<string, string> customizedMessages)
         {
-
+              string msgRule;
+             string msgValue;
+             string dot = ".";
             string errorMsg;
             ErrorMessages.TryGetValue(errorKey, out errorMsg);
 

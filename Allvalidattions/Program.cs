@@ -22,7 +22,7 @@ namespace AllValidations
 
     public class BaseIValidator
     {
-
+        
         public void RSValidate(IValidator RSvalidators)
         {
 
@@ -30,7 +30,7 @@ namespace AllValidations
             try
             {
                 IDictionary<string, object> InputMessage = new Dictionary<string, object>();
-                InputMessage["firstname"] = "anitha";
+                InputMessage["firstname"] = "";
 
                 IDictionary<string, string> InputRule = new Dictionary<string, string>();
                 InputRule["firstname"] = "required|regex:[^a-zA-Z]+$";
@@ -43,10 +43,10 @@ namespace AllValidations
 
 
                 var resultObj = RSValidator.RSValidate(InputMessage, InputRule, CustomMessages);
-
+                Console.WriteLine(resultObj.);
                 foreach (KeyValuePair<string, string> item in resultObj.errormsgs.OutputErrors)
                 {
-                    Console.WriteLine(" {0}=>:{1}", item.Key, item.Value);
+                   Console.WriteLine(" {0}=>:{1}", item.Key, item.Value);
                 }
 
             }

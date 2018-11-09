@@ -10,8 +10,11 @@ namespace RsValidations
 
     public class RSValidator
     {
+       public CommonErrors errormsgs = new CommonErrors();
+         
+         public string KEY = "firstname";
          Validator obj = new Validator();
-         public CommonErrors errormsgs = new CommonErrors();
+        
       
         IDictionary<string, string> customizedmessages;
 
@@ -99,7 +102,7 @@ namespace RsValidations
                         case commonerrormesgs.required:
 
                             if (!obj.HasValue(Convert.ToString(currentValue)))
-                                errormsgs.CustomMessages(currentKey, errorKey, customizedmessages);
+                                errormsgs.GetErrorMessages(currentKey, errorKey, customizedmessages);
                             else break;
                             break;
 
@@ -108,7 +111,7 @@ namespace RsValidations
                                 throw new Exception("Regexmethod received a null argument!");
 
                             if (!obj.IsMatchRegex(Convert.ToString(currentValue), lettersnums[1]))
-                                errormsgs.CustomMessages(currentKey, errorKey, customizedmessages);
+                                errormsgs.GetErrorMessages(currentKey, errorKey, customizedmessages);
                             break;
                     }
 
@@ -122,6 +125,57 @@ namespace RsValidations
 
             }
         }
+
+
+        public string value
+        {
+            get
+            { 
+
+                if (errormsgs.OutputErrors.ContainsKey(KEY))
+                {
+                    return errormsgs.OutputErrors[KEY];
+                }
+                else
+                {
+                    return "null";
+                }
+            }
+
+        }
+
+        public bool HasError
+        {
+            get
+            {
+                return errormsgs.OutputErrors.Count > 0;
+            }
+        }
+
+        public List<string> ErrorKeys
+        {
+            get
+            {
+                return errormsgs.OutputErrors.Keys.ToList();
+            }
+
+        }
+
+        public string[] ErrorValues
+        {
+            get
+            {
+                return errormsgs.OutputErrors.Values.ToArray();
+            }
+        }
+        public Dictionary<string, string> ErrorkeyValues
+        {
+            get
+            {
+                return errormsgs.OutputErrors;
+            }
+        }
+
 
         }
     }
