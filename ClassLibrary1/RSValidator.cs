@@ -3,127 +3,125 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-
-
+using Validatoins;
+using Errormessages;
 namespace RsValidations
-{
+{   
 
     public class RSValidator
     {
-        public Dictionary<string, string> OutputErrors = new Dictionary<string, string> { };
-
-        private string msgRule;
-        private string msgvalue;
-        private string dot = ".";
-
-        public enum commonerrormesgs
-        { required, regex };
-
-        Dictionary<commonerrormesgs, string> ErrorMessages = new Dictionary<commonerrormesgs, string>  {
-         {commonerrormesgs.required,"The {{fieldname}} must be required "},
-         {commonerrormesgs.regex,"The {{fieldname}} is not given pattern"},};
-
-
+         Validator obj = new Validator();
+         public CommonErrors errormsgs = new CommonErrors();
+      
         IDictionary<string, string> customizedmessages;
 
-        public static RSValidator RSValidate(IDictionary<string, object> ValidateValue, IDictionary<string, string> ValidationRule, IDictionary<string, string> CustomMessages)
+        public static RSValidator RSValidate(IDictionary<string, object> validateValue, IDictionary<string, string> validationRule, IDictionary<string, string> CustomMessages)
         {
-
+           
             RSValidator obj = new RSValidator();
             obj.customizedmessages = CustomMessages;
 
-            string[] validatevalueKey = ValidateValue.Keys.ToArray();
-            var validatevalueval = ValidateValue.Values.ToArray();
+            string[] validatevalueKey = validateValue.Keys.ToArray();
 
 
             for (int i = 0; i <= validatevalueKey.Length - 1; i++)
             {
-
-                if (ValidationRule.ContainsKey(validatevalueKey[i]))
-                {
-
-                    var value = validatevalueKey[i];
-                    string Rules;
-                    ValidationRule.TryGetValue(validatevalueKey[i], out Rules);
-
-                    string ruleslwr = Rules.ToLower();
-                    string[] Ruleslist = ruleslwr.Split('|'); //split the given string
-
-
-                    int ruleslength = Ruleslist.Length;  //array length
-
-
-                    for (int j = 0; j < ruleslength; j++)
-                    {
-                        string[] lettersnums = Ruleslist[j].Split(':');
-
-                        commonerrormesgs ErrorKey = (commonerrormesgs)Enum.Parse(typeof(commonerrormesgs), lettersnums[0]);
-
-                        switch (ErrorKey)
-                        {
-                            case commonerrormesgs.required:
-
-                                if (!obj.HasValue(Convert.ToString(validatevalueval[i])))
-                                 obj.CustomMessages(validatevalueKey[i], ErrorKey);
-                                 else break;
-                                 break;
-
-                            case commonerrormesgs.regex:
-                                 if (!obj.IsMatchRegex(Convert.ToString(validatevalueval[i]), lettersnums[1]))
-                                obj.CustomMessages(validatevalueKey[i], ErrorKey);
-                                break;
-                        }
-                    }
-                }
+                obj.InputData(validatevalueKey[i], validateValue, validationRule);
             }
             return obj;
         }
 
-        /// <summary>
-        /// Has values return true or else return false 
-        /// </summary>
-        /// <param name="inputmsgValue"></param>
-        /// <returns></returns>
-        bool HasValue(string inputMsgValue)
+       void InputData(string valiDateValueKey, IDictionary<string, object> valiDateValue, IDictionary<string, string> valiDationRule)
         {
-            return !string.IsNullOrEmpty(inputMsgValue);
-        }
-        void CustomMessages(string inputMsgKey, commonerrormesgs errorKey)
-        {
+            string currentRule;
+            object currentValue;
+            string currentKey;
 
-            string errorMsg;
-            ErrorMessages.TryGetValue(errorKey, out errorMsg);
-
-            msgRule = string.Concat(inputMsgKey, dot, errorKey);
-
-            if (customizedmessages.ContainsKey(msgRule))
-            {
-                customizedmessages.TryGetValue(msgRule, out msgvalue);
-
-                OutputErrors.Add(inputMsgKey, msgvalue);
-            }
-
-            else
-            {
-                OutputErrors.Add(inputMsgKey, errorMsg.Replace("{{fieldname}}", inputMsgKey));
-            }
+            currentKey = valiDateValueKey;
+            currentValue = InputValue(currentKey, valiDateValue);
+            currentRule = InputRule(currentKey, valiDationRule);
+            Operation(currentRule, currentValue, currentKey,customizedmessages);
 
         }
 
         /// <summary>
-        /// If input match given regex return true or else return false 
+        /// Get the value associated with the particular key
         /// </summary>
-        /// <param name="inputmsgValue"></param>
-        /// <param name="pattern"></param>
+        /// <param name="currentKey"></param>
+        /// <param name="validateValue"></param>
         /// <returns></returns>
-        bool IsMatchRegex(string inputMsgValue, string pattern)
+        object InputValue(string currentKey, IDictionary<string, object> validateValue)
         {
-            if (!HasValue(inputMsgValue))
-                return true;
-            Regex regex = new Regex(pattern);
-            return regex.IsMatch(inputMsgValue);
+            object rules;
+             validateValue.TryGetValue(currentKey, out rules);
+             return rules;
+        }
+        /// <summary>
+        /// Get the rule  associated with the particular key 
+        /// </summary>
+        /// <param name="currentkey"></param>
+        /// <param name="validationRule"></param>
+        /// <returns></returns>
+
+        string InputRule(string currentkey, IDictionary<string, string> validationRule)
+        {
+            string inputrules;
+            validationRule.TryGetValue(currentkey, out inputrules);
+            return inputrules;
+        }
+        /// <summary>
+        /// split the rules and call particular validation method.if validation fail call errormessages method
+        /// </summary>
+        /// <param name="currentRule"></param>
+        /// <param name="currentValue"></param>
+        /// <param name="currentKey"></param>
+        /// <param name="customizedmessages"></param>
+        void Operation(string currentRule, object currentValue, string currentKey, IDictionary<string, string> customizedmessages)
+        {
+
+
+            string rulesLwr = currentRule.ToLower();
+            string[] rulesList = rulesLwr.Split('|');
+            int rulesLength = rulesList.Length;
+
+
+
+            try
+            {
+                for (int j = 0; j < rulesLength; j++)
+                {
+                    string[] lettersnums = rulesList[j].Split(':');
+
+                    commonerrormesgs errorKey = (commonerrormesgs)Enum.Parse(typeof(commonerrormesgs), lettersnums[0]);
+
+                    switch (errorKey)
+                    {
+                        case commonerrormesgs.required:
+
+                            if (!obj.HasValue(Convert.ToString(currentValue)))
+                                errormsgs.CustomMessages(currentKey, errorKey, customizedmessages);
+                            else break;
+                            break;
+
+                        case commonerrormesgs.regex:
+                            if (lettersnums.Count() == 1 || string.IsNullOrEmpty(lettersnums[1]))
+                                throw new Exception("Regexmethod received a null argument!");
+
+                            if (!obj.IsMatchRegex(Convert.ToString(currentValue), lettersnums[1]))
+                                errormsgs.CustomMessages(currentKey, errorKey, customizedmessages);
+                            break;
+                    }
+
+                }
+
+            }
+
+            catch (ArgumentException)
+            {
+                throw new Exception("Invalid argument");
+
+            }
+        }
+
         }
     }
-}
-
-            

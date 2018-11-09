@@ -7,6 +7,10 @@ using System.Globalization;
 using System.Net.Sockets;
 using Microsoft.VisualBasic;
 using RsValidations;
+using Errormessages;
+using Validatoins;
+
+
 
 namespace AllValidations
 {
@@ -18,32 +22,40 @@ namespace AllValidations
 
     public class BaseIValidator
     {
+
         public void RSValidate(IValidator RSvalidators)
         {
 
-           
 
-            IDictionary<string, object> InputMessage = new Dictionary<string, object>();
-            InputMessage["firstname"] = "";
-            
-            IDictionary<string, string> InputRule = new Dictionary<string, string>();
-            InputRule["firstname"] = "required|regex:[^a-zA-Z]+$";
-            
-            IDictionary<string, string> CustomMessages = new Dictionary<string, string>{
-             { "firstname.required" , "Please Enter name."}, };
-           
-           
-
-
-           
-            var resultObj = RSValidator.RSValidate(InputMessage, InputRule, CustomMessages);
-            Console.WriteLine("*****Validation Error*****");
-            foreach (KeyValuePair<string, string> item in resultObj.OutputErrors)
+            try
             {
-                Console.WriteLine(" {0}=>:{1}", item.Key,item.Value);
+                IDictionary<string, object> InputMessage = new Dictionary<string, object>();
+                InputMessage["firstname"] = "anitha";
+
+                IDictionary<string, string> InputRule = new Dictionary<string, string>();
+                InputRule["firstname"] = "required|regex:[^a-zA-Z]+$";
+
+                IDictionary<string, string> CustomMessages = new Dictionary<string, string>{
+                { "firstname.required" , "Please Enter name."}, };
+
+
+
+
+
+                var resultObj = RSValidator.RSValidate(InputMessage, InputRule, CustomMessages);
+
+                foreach (KeyValuePair<string, string> item in resultObj.errormsgs.OutputErrors)
+                {
+                    Console.WriteLine(" {0}=>:{1}", item.Key, item.Value);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
             }
             Console.ReadLine();
-
         }
     }
     public class MainClass
