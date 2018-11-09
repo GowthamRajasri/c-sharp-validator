@@ -24,43 +24,30 @@ This is in dictionary format. Keys and values both are string. Values are having
 ## For Example:
 ```c#
  //Input messages are given like,
-
 Dictionary<string, object> InputMessage = new Dictionary<string, object>().
-
     
 //Input rules are given like,
-
 Dictionary<string, string> InputRule = new Dictionary<string, string>().
 
-   
 //Custom messages are given like,
-
 Dictionary<string, string> CustomMessages = new Dictionary<string, string>().
 
 //These inputs are passing as parameter like,
-
 var resultObj = RSValidator.RSValidate(InputMessage,InputRule,CustomMessages).
 
-And get input keys and corresponding  values and validation rules using methods.
-
+// And get input keys and corresponding  values and validation rules using methods.
 //Split the rules using,
+string[] Ruleslist = ruleslwr.Split('|').
 
-(string[] Ruleslist = ruleslwr.Split('|')).
-
-Using switch case detect which validation and call that method.
-
-If  Required validation ,call method of
-
+// Using switch case detect which validation and call that method.
+// If  Required validation ,call method of
 (obj.HasValue(Convert.ToString(validatevalueval[i]))`
 
-this method return when input has value or else return false.
-
-If  this method return false it has error ,so call error messages method  to throw an error
-
+// this method return when input has value or else return false.
+// If  this method return false it has error ,so call error messages method  to throw an error
 (obj.CustomMessages(validatevalueKey[i], ErrorKey)`.Like this other validation has to done.
 
 //Error output is dictionary format
-
 (Dictionary<string, string> OutputErrors = new Dictionary<string, string> { }).
 
 ```
