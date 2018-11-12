@@ -45,10 +45,10 @@ Dictionary<string, string>
 //If output has error return true or elae return fales
 public bool HasError
 
-//Get errorkeys only 
+//Get errorkeys only from output 
 public List<string> ErrorKeys
 
-//Get errorvalues only
+//Get errorvalues only from output 
  public string[] ErrorValues
  
 ```
