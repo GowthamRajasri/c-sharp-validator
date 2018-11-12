@@ -35,22 +35,20 @@ Dictionary<string, string> CustomMessages = new Dictionary<string, string>().
 //These inputs are passing as parameter like,
 var resultObj = RSValidator.RSValidate(InputMessage,InputRule,CustomMessages).
 
-//Get input keys and corresponding  values and validation rules using methods and do the validations.
+// And get input keys and corresponding  values and validation rules using methods.
+// Using switch case detect which validation and call that method.
 
 //Error output is dictionary format
-Dictionary<string, string>
-//Here key is inputmessage key and value is coresponding error message.
+Dictionary<string, string> 
+//Here key is inputkey and value is corresponding error messages.
 
-//If output has error return true or else return false.
+//If output has error return true or elae return fales
 public bool HasError
 
-//Get errorkeys only
+//Get errorkeys only 
 public List<string> ErrorKeys
-        
+
 //Get errorvalues only
-public string[] ErrorValues
-
-//Get errorkeyvalues 
-public Dictionary<string, string> ErrorkeyValues
-
+ public string[] ErrorValues
+ 
 ```
